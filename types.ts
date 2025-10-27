@@ -20,6 +20,12 @@ export interface AppointmentRequest {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  customerAddress: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
   slots: AppointmentSlot[];
   submittedAt: Date;
 }

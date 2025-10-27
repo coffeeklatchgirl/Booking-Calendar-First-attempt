@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { AppointmentStatus, AppointmentRequest, AppointmentSlot } from '../types';
 import { CalendarIcon, CheckCircleIcon, TrashIcon, UserIcon, ServiceIcon, DollarIcon } from './icons';
@@ -130,6 +131,10 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [street, setStreet] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -142,7 +147,6 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
     const serviceOptions = serviceData[serviceType];
     const uniquePetCounts = [...new Set(serviceOptions.map(s => s.numPets))];
     
-    // For 24-Hour Care, allow up to 6 pets, calculating price dynamically
     if (serviceType === '24-Hour Care') {
       return [1, 2, 3, 4, 5, 6];
     }
@@ -245,12 +249,13 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !customerEmail || !customerPhone || selectedSlots.length === 0) {
+    if (!customerName || !customerEmail || !customerPhone || !street || !city || !state || !zip || selectedSlots.length === 0) {
       alert('Please fill in all fields and select at least one appointment slot.');
       return;
     }
     const request: Omit<AppointmentRequest, 'id' | 'submittedAt'> = {
       customerName, customerEmail, customerPhone,
+      customerAddress: { street, city, state, zip },
       slots: selectedSlots.map(slot => {
         const dateTime = new Date(slot.date);
         dateTime.setHours(timeCategories[slot.category].start, 0, 0, 0);
@@ -263,6 +268,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
     };
     onSubmit(request);
     setCustomerName(''); setCustomerEmail(''); setCustomerPhone(''); setSelectedSlots([]);
+    setStreet(''); setCity(''); setState(''); setZip('');
   };
 
   const totalPrice = useMemo(() => selectedSlots.reduce((sum, s) => sum + s.price, 0), [selectedSlots]);
@@ -271,6 +277,8 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
     if (serviceType === 'Drop-In') return false;
     return selectedSlots.some(slot => slot.date.toDateString() === selectedDate.toDateString() && slot.serviceType === serviceType);
   }, [selectedDate, selectedSlots, serviceType]);
+
+  const isFormInvalid = !customerName || !customerEmail || !customerPhone || !street || !city || !state || !zip || selectedSlots.length === 0;
 
   return (
     <div>
@@ -284,6 +292,14 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
             <input type="text" placeholder="Full Name" value={customerName} onChange={e => setCustomerName(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
             <input type="email" placeholder="Email Address" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
             <input type="tel" placeholder="Phone Number" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+          <div className="grid grid-cols-1 gap-4 mt-4">
+            <input type="text" placeholder="Street Address" value={street} onChange={e => setStreet(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <input type="text" placeholder="City" value={city} onChange={e => setCity(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+            <input type="text" placeholder="State" value={state} onChange={e => setState(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+            <input type="text" placeholder="Zip Code" value={zip} onChange={e => setZip(e.target.value)} required className="p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition" />
           </div>
         </div>
 
@@ -400,7 +416,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit }) => {
                       </div>
                   </div>
               )}
-               <button type="submit" disabled={selectedSlots.length === 0 || !customerName || !customerEmail} className="w-full mt-6 bg-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:bg-neutral-300 disabled:cursor-not-allowed">
+               <button type="submit" disabled={isFormInvalid} className="w-full mt-6 bg-primary text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:bg-neutral-300 disabled:cursor-not-allowed">
                   Submit Request for {selectedSlots.length} Appointment{selectedSlots.length !== 1 ? 's' : ''}
               </button>
           </div>

@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { AppointmentRequest, AppointmentSlot, AppointmentStatus } from '../types';
-import { CheckCircleIcon, XCircleIcon, ClockIcon } from './icons';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, MapPinIcon } from './icons';
 
 interface AdminDashboardProps {
   requests: AppointmentRequest[];
@@ -73,6 +74,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ requests, onStat
                                     <div>
                                         <h3 className="text-xl font-bold text-neutral-900">{request.customerName}</h3>
                                         <p className="text-sm text-neutral-600">{request.customerEmail} &bull; {request.customerPhone}</p>
+                                        <p className="text-sm text-neutral-600 mt-1 flex items-center gap-1.5">
+                                            <MapPinIcon className="w-4 h-4 text-neutral-400 flex-shrink-0" />
+                                            <span>{request.customerAddress.street}, {request.customerAddress.city}, {request.customerAddress.state} {request.customerAddress.zip}</span>
+                                        </p>
                                         <p className="text-xs text-neutral-400 mt-1">
                                             Submitted on {request.submittedAt.toLocaleString()}
                                         </p>
